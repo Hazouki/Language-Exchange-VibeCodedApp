@@ -1,0 +1,538 @@
+<title>Kept Language Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a weekly timetable is the motif — hero ticket, cause→fix ledger, then a 4-step working prototype */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#141B2D; --muted:#586179; --line:#DCE1EA;
+  --accent:#2448D8; --accent-ink:#FFFFFF; --accent-soft:#E4EAFF;
+  --kept:#D99412; --kept-soft:#FFF2D2;
+  --bad:#C23E2C; --bad-soft:#FBE4DF; --good:#1C8455; --good-soft:#DCF2E6;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Figtree", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F1320; --surface:#171C2C; --ink:#E8ECF5; --muted:#9AA3B8; --line:#2A3147;
+  --accent:#7F98FF; --accent-ink:#0F1320; --accent-soft:#1F2952;
+  --kept:#F2BA45; --kept-soft:#3A2D10; --bad:#F07C6A; --bad-soft:#3B1E19; --good:#4ECB90; --good-soft:#133424;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0F1320; --surface:#171C2C; --ink:#E8ECF5; --muted:#9AA3B8; --line:#2A3147;
+  --accent:#7F98FF; --accent-ink:#0F1320; --accent-soft:#1F2952;
+  --kept:#F2BA45; --kept-soft:#3A2D10; --bad:#F07C6A; --bad-soft:#3B1E19; --good:#4ECB90; --good-soft:#133424;
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font:16px/1.55 var(--f-body); padding-inline:16px}
+.wrap{max-width:1080px; margin:0 auto; padding-block:28px 64px; display:flex; flex-direction:column; gap:72px}
+h1,h2,h3{font-family:var(--f-display); text-wrap:balance; margin:0; line-height:1.08}
+h1{font-size:clamp(2.4rem,6vw,4.2rem); font-weight:800; letter-spacing:-.02em}
+h2{font-size:clamp(1.6rem,3.4vw,2.3rem); font-weight:700; letter-spacing:-.01em}
+h3{font-size:1.15rem; font-weight:700}
+p{margin:0}
+.eyebrow{font:600 .74rem/1 var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+button{font:inherit; cursor:pointer}
+:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+/* top bar */
+.bar{display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap}
+.logo{font:800 1.5rem/1 var(--f-display); letter-spacing:-.02em; display:flex; align-items:center; gap:8px}
+.logo i{width:14px; height:14px; border-radius:50%; background:var(--kept); display:inline-block}
+.bar small{font-family:var(--f-mono); color:var(--muted); font-size:.78rem}
+
+/* hero */
+.hero{display:grid; grid-template-columns:1.25fr 1fr; gap:48px; align-items:center}
+.hero > div{min-width:0; display:flex; flex-direction:column; gap:20px}
+.hero p.lede{font-size:1.15rem; max-width:34em; color:var(--muted)}
+.problem{border-left:3px solid var(--line); padding-left:14px; font-size:.95rem; color:var(--muted); max-width:34em}
+.problem b{color:var(--ink)}
+.ticket{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:22px; display:flex; flex-direction:column; gap:16px; box-shadow:0 18px 40px -24px rgba(20,27,45,.35)}
+.ticket .when{font:700 2.2rem/1 var(--f-display); letter-spacing:-.02em}
+.ticket .when span{color:var(--accent)}
+.pair{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.av{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font:700 .9rem var(--f-display); background:var(--accent-soft); color:var(--accent); flex:none}
+.av.k{background:var(--kept-soft); color:var(--kept)}
+.dots{display:flex; gap:6px; flex-wrap:wrap}
+.dot{width:22px; height:22px; border-radius:6px; background:var(--line)}
+.dot.on{background:var(--kept)}
+.dot.next{background:transparent; border:2px dashed var(--accent)}
+.ticket hr{border:0; border-top:1px dashed var(--line); margin:0}
+.row{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.9rem}
+
+/* ledger */
+.ledger{display:flex; flex-direction:column; gap:20px}
+.ledger-head{display:flex; flex-direction:column; gap:10px; max-width:40em}
+.lrow{display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--line)}
+.lrow > div{padding:18px 20px 18px 0; display:flex; flex-direction:column; gap:6px; min-width:0}
+.lrow > div + div{padding-left:20px; border-left:1px solid var(--line)}
+.lrow .tag{font:600 .7rem/1 var(--f-mono); letter-spacing:.1em; text-transform:uppercase}
+.lrow .cause .tag{color:var(--bad)} .lrow .fix .tag{color:var(--good)}
+.lrow p{color:var(--muted); font-size:.95rem}
+
+/* prototype */
+.proto{display:flex; flex-direction:column; gap:20px}
+.steps{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+.step{background:transparent; border:1px solid var(--line); border-radius:12px; padding:10px 12px; text-align:left; color:var(--muted); display:flex; flex-direction:column; gap:2px}
+.step b{font:600 .72rem var(--f-mono); letter-spacing:.08em}
+.step span{font-weight:600; color:inherit}
+.step[aria-current="step"]{border-color:var(--accent); background:var(--accent-soft); color:var(--ink)}
+.step[aria-current="step"] b{color:var(--accent)}
+.step:disabled{opacity:.45; cursor:not-allowed}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:clamp(18px,3vw,32px); display:flex; flex-direction:column; gap:22px}
+.panel-head{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap}
+.panel-head > div{display:flex; flex-direction:column; gap:6px; min-width:0; max-width:40em}
+.fields{display:flex; gap:14px; flex-wrap:wrap}
+.field{display:flex; flex-direction:column; gap:6px; font-size:.82rem; font-weight:600; color:var(--muted); flex:1 1 160px}
+select{font:500 1rem var(--f-body); padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink)}
+.btn{border:0; border-radius:12px; padding:12px 18px; font-weight:700; background:var(--accent); color:var(--accent-ink)}
+.btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+.btn.warn{background:var(--bad-soft); color:var(--bad)}
+.btn:disabled{opacity:.5; cursor:not-allowed}
+.actions{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+/* availability grid */
+.gridwrap{overflow-x:auto}
+.grid{display:grid; grid-template-columns:52px repeat(7, minmax(36px,1fr)); gap:4px; min-width:330px}
+.grid .h{font:600 .72rem var(--f-mono); color:var(--muted); display:flex; align-items:center; justify-content:center}
+.cell{height:26px; border-radius:6px; border:1px solid var(--line); background:var(--bg); padding:0}
+.cell.on{background:var(--accent); border-color:var(--accent)}
+.cell:hover{border-color:var(--accent)}
+.legend{font-size:.85rem; color:var(--muted)}
+
+/* matches */
+.notes{display:flex; flex-direction:column; gap:6px; font-size:.88rem; color:var(--muted)}
+.notes div{display:flex; gap:8px} .notes div::before{content:"–"; color:var(--line)}
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px}
+.card{border:1px solid var(--line); border-radius:16px; padding:18px; display:flex; flex-direction:column; gap:14px; background:var(--bg)}
+.card.pick{border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft)}
+.card .who{display:flex; gap:12px; align-items:center}
+.card .who > div{min-width:0}
+.card .who b{display:block}
+.card .who small{color:var(--muted)}
+.rel{display:flex; flex-direction:column; gap:6px; font-size:.85rem}
+.meter{height:8px; border-radius:99px; background:var(--line); overflow:hidden}
+.meter i{display:block; height:100%; background:var(--good); border-radius:inherit}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{font:600 .78rem var(--f-mono); padding:5px 9px; border-radius:8px; background:var(--accent-soft); color:var(--accent); border:1px solid transparent}
+.chip small{font-weight:400; opacity:.75}
+button.chip{cursor:pointer}
+button.chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.pill{font:600 .72rem var(--f-mono); padding:4px 8px; border-radius:99px; letter-spacing:.04em; white-space:nowrap}
+.pill.good{background:var(--good-soft); color:var(--good)}
+.pill.kept{background:var(--kept-soft); color:var(--kept)}
+.pill.bad{background:var(--bad-soft); color:var(--bad)}
+.pill.info{background:var(--accent-soft); color:var(--accent)}
+.pill.idle{background:var(--line); color:var(--muted)}
+.empty{border:1px dashed var(--line); border-radius:16px; padding:24px; color:var(--muted)}
+
+/* pact */
+.pact{display:grid; grid-template-columns:1fr 1fr; gap:24px}
+.pact > div{display:flex; flex-direction:column; gap:14px; min-width:0}
+.rules{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px}
+.rules li{display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:baseline; font-size:.95rem}
+.rules li b{font:600 .78rem var(--f-mono); color:var(--accent); min-width:56px}
+.sign{display:flex; gap:12px; flex-wrap:wrap}
+.sig{flex:1 1 140px; border:1px dashed var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:4px; font-size:.85rem}
+.sig .s{font:700 1.2rem var(--f-display); color:var(--muted)}
+.sig.done{border-style:solid; border-color:var(--good)}
+.sig.done .s{color:var(--good)}
+
+/* session */
+.sess{display:grid; grid-template-columns:1.1fr 1fr; gap:24px}
+.sess > div{display:flex; flex-direction:column; gap:16px; min-width:0}
+.room{border:1px solid var(--line); border-radius:16px; padding:20px; background:var(--bg); display:flex; flex-direction:column; gap:16px}
+.clock{font:600 3rem/1 var(--f-mono); letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.halves{display:grid; grid-template-columns:1fr 1fr; gap:4px}
+.half{display:flex; flex-direction:column; gap:6px; font-size:.8rem; color:var(--muted)}
+.half .track{height:10px; border-radius:99px; background:var(--line); overflow:hidden}
+.half .track i{display:block; height:100%; width:0; background:var(--accent)}
+.half.b .track i{background:var(--kept)}
+.half.now{color:var(--ink); font-weight:600}
+.prompt{font:600 1.15rem/1.35 var(--f-display); min-height:3em}
+.weeks{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.weeks li{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 0; border-top:1px solid var(--line); font-size:.92rem}
+.weeks li > span:first-child{display:flex; flex-direction:column}
+.weeks li small{color:var(--muted)}
+.callout{border-radius:14px; padding:14px 16px; font-size:.92rem; display:flex; flex-direction:column; gap:10px}
+.callout.bad{background:var(--bad-soft)} .callout.good{background:var(--good-soft)} .callout.info{background:var(--accent-soft)}
+.stats{display:flex; gap:20px; flex-wrap:wrap}
+.stat{display:flex; flex-direction:column}
+.stat b{font:700 1.8rem/1.1 var(--f-display); font-variant-numeric:tabular-nums}
+.stat span{font-size:.8rem; color:var(--muted)}
+
+/* build notes */
+.build{display:grid; grid-template-columns:repeat(3,1fr); gap:28px}
+.build > div{display:flex; flex-direction:column; gap:8px; min-width:0}
+.build ul{margin:0; padding-left:18px; color:var(--muted); font-size:.93rem; display:flex; flex-direction:column; gap:4px}
+.build code{font-family:var(--f-mono); font-size:.85em; color:var(--ink)}
+.metric{font:800 3.2rem/1 var(--f-display); color:var(--kept)}
+footer{font:.8rem var(--f-mono); color:var(--muted); border-top:1px solid var(--line); padding-top:18px}
+
+@media (max-width:820px){
+  .hero,.pact,.sess,.build{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .lrow{grid-template-columns:1fr}
+  .lrow > div{padding:14px 0}
+  .lrow > div + div{padding:0 0 16px; border-left:0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .panel{animation:rise .35s ease both}
+  @keyframes rise{from{transform:translateY(6px)}to{transform:none}}
+}
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <div class="logo"><i aria-hidden="true"></i>Kept</div>
+    <small>solution concept + working prototype</small>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Language exchange that shows up</span>
+      <h1>Same partner. Same hour. Every week.</h1>
+      <p class="lede">Kept matches you on <b>when</b> you're free before <b>what</b> you speak, binds you both to a short weekly pact, and pairs people who keep their word with each other.</p>
+      <p class="problem"><b>The problem:</b> someone learning a new language needs a regular conversation partner, while most exchange apps match them with people who never show up.</p>
+      <div class="actions"><a class="btn" href="#try" style="text-decoration:none">Try the prototype</a></div>
+    </div>
+    <aside class="ticket" aria-label="Example standing session">
+      <div class="row"><span class="eyebrow">Standing session</span><span class="pill good">Both confirmed</span></div>
+      <div class="when">Tue <span>19:00</span></div>
+      <div class="pair">
+        <div class="av">YO</div><span class="mono">EN ⇄ ES</span><div class="av k">LU</div>
+        <span class="muted" style="font-size:.9rem">You and Lucía, Madrid</span>
+      </div>
+      <hr>
+      <div class="row"><span>Weeks kept</span><span class="mono">7 of 8</span></div>
+      <div class="dots" aria-hidden="true"><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot next"></i></div>
+      <div class="row muted"><span>15 min Spanish · 15 min English</span><span class="mono">week 9 →</span></div>
+    </aside>
+  </section>
+
+  <section class="ledger">
+    <div class="ledger-head">
+      <span class="eyebrow">Diagnosis</span>
+      <h2>Why partners disappear, and the fix for each cause</h2>
+    </div>
+    <div>
+      <div class="lrow"><div class="cause"><span class="tag">Cause</span><h3>Matching ignores time</h3><p>You match on language, then find out your partner is asleep whenever you're free. The chat fades out.</p></div>
+        <div class="fix"><span class="tag">Fix</span><h3>Schedule-first matching</h3><p>You mark your free weekly hours. You only see people whose hours overlap yours, shown in both time zones.</p></div></div>
+      <div class="lrow"><div class="cause"><span class="tag">Cause</span><h3>Nothing is at stake</h3><p>An open-ended chat costs nothing to ignore, and dozens of matches make each one feel disposable.</p></div>
+        <div class="fix"><span class="tag">Fix</span><h3>One partner, one weekly pact</h3><p>A 4-week agreement on a fixed slot. You have one active partner at a time. Each session needs a confirm 24 hours before.</p></div></div>
+      <div class="lrow"><div class="cause"><span class="tag">Cause</span><h3>Reliable and flaky users are mixed</h3><p>The people who do show up keep getting matched with people who don't, and they quit first.</p></div>
+        <div class="fix"><span class="tag">Fix</span><h3>Reliability record and bands</h3><p>Every profile shows sessions kept out of sessions scheduled. Matching only pairs people in the same reliability band.</p></div></div>
+      <div class="lrow"><div class="cause"><span class="tag">Cause</span><h3>Sessions feel one-sided</h3><p>One person ends up teaching for an hour and gets nothing back, so they stop coming.</p></div>
+        <div class="fix"><span class="tag">Fix</span><h3>A 15 / 15 session room</h3><p>A built-in timer splits each call evenly between both languages, with topic prompts so nobody has to plan.</p></div></div>
+      <div class="lrow"><div class="cause"><span class="tag">Cause</span><h3>One no-show breaks the habit</h3><p>A missed week turns into a missed month, and the learner has to start searching again.</p></div>
+        <div class="fix"><span class="tag">Fix</span><h3>Standby cover and auto-rematch</h3><p>A backup learner from the standby pool covers a missed slot. Two no-shows end the pact and you're rematched automatically.</p></div></div>
+    </div>
+  </section>
+
+  <section class="proto" id="try">
+    <div class="ledger-head">
+      <span class="eyebrow">Prototype</span>
+      <h2>Walk through it as a learner</h2>
+      <p class="muted">Pre-filled with an example learner in Beirut (UTC+3) who speaks English and is learning Spanish. The partners are sample profiles. Change anything and the matching reruns.</p>
+    </div>
+    <nav class="steps" aria-label="Prototype steps">
+      <button class="step" data-step="1"><b>STEP 1</b><span>Your hours</span></button>
+      <button class="step" data-step="2"><b>STEP 2</b><span>Matches</span></button>
+      <button class="step" data-step="3"><b>STEP 3</b><span>The pact</span></button>
+      <button class="step" data-step="4"><b>STEP 4</b><span>Sessions</span></button>
+    </nav>
+    <div id="stage"></div>
+  </section>
+
+  <section class="ledger">
+    <div class="ledger-head">
+      <span class="eyebrow">Building it for real</span>
+      <h2>What the MVP needs</h2>
+    </div>
+    <div class="build">
+      <div><h3>Data and matching</h3><ul>
+        <li>Store availability as <code>UTC minute-of-week</code> ranges so overlap is a set intersection.</li>
+        <li>Reliability = kept ÷ scheduled over the last 12 sessions. New users start in a trial band.</li>
+        <li>A nightly job proposes matches, ranked by band, then overlap hours.</li>
+      </ul></div>
+      <div><h3>Stack and calls</h3><ul>
+        <li>Next.js + Postgres (Supabase for auth and row-level security).</li>
+        <li>Video in-browser through LiveKit or Daily, so the timer and prompts sit beside the call.</li>
+        <li>Reminders by push and email at 24 h (confirm) and 15 min (join link).</li>
+        <li>Attendance is logged automatically from who joined the room.</li>
+      </ul></div>
+      <div><h3>The number to watch</h3>
+        <div class="metric">Week-4 show-up</div>
+        <p class="muted" style="font-size:.93rem">The share of pacts where both people attend session 4. That is the habit forming. Track it next to standby fill rate and time to rematch.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>Kept is a concept design. All partner profiles in the prototype are fictional examples.</footer>
+</div>
+
+<script>
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const HOURS=Array.from({length:16},(_,i)=>i+7);
+const LANGS=['English','Spanish','French','Arabic','Japanese','Portuguese','German'];
+const TZS=[[-6,'Mexico City'],[-5,'Bogotá / Chicago'],[-4,'New York / Toronto'],[-3,'São Paulo'],[0,'UTC'],[1,'London / Casablanca'],[2,'Madrid / Berlin'],[3,'Beirut / Amman'],[4,'Dubai'],[9,'Tokyo / Seoul']];
+const k=(d,h)=>d*24+h;
+const mod=(n,m)=>((n%m)+m)%m;
+
+// Sample pool: local slots as [day,hour]
+const POOL=[
+ {id:'lucia',name:'Lucía',city:'Madrid',tz:2,speaks:'Spanish',learns:'English',kept:22,sched:23,level:'B1',slots:[[1,18],[1,19],[3,18],[6,11]]},
+ {id:'diego',name:'Diego',city:'Mexico City',tz:-6,speaks:'Spanish',learns:'English',kept:31,sched:33,level:'B2',slots:[[1,10],[3,11],[2,12]]},
+ {id:'vale',name:'Valentina',city:'Bogotá',tz:-5,speaks:'Spanish',learns:'English',kept:14,sched:15,level:'A2',slots:[[0,13],[4,12],[5,9]]},
+ {id:'martin',name:'Martín',city:'Buenos Aires',tz:-3,speaks:'Spanish',learns:'English',kept:18,sched:19,level:'B1',slots:[[2,20],[4,21]]},
+ {id:'pablo',name:'Pablo',city:'Seville',tz:2,speaks:'Spanish',learns:'English',kept:7,sched:13,level:'B1',slots:[[1,18],[3,19]]},
+ {id:'camille',name:'Camille',city:'Paris',tz:2,speaks:'French',learns:'English',kept:19,sched:20,level:'B2',slots:[[1,18],[3,19],[5,10]]},
+ {id:'hugo',name:'Hugo',city:'Montréal',tz:-4,speaks:'French',learns:'English',kept:9,sched:10,level:'B1',slots:[[1,12],[3,13]]},
+ {id:'haruto',name:'Haruto',city:'Tokyo',tz:9,speaks:'Japanese',learns:'English',kept:26,sched:27,level:'A2',slots:[[5,17],[6,16],[1,22]]},
+ {id:'layla',name:'Layla',city:'Amman',tz:3,speaks:'Arabic',learns:'English',kept:12,sched:12,level:'B1',slots:[[1,19],[3,20],[0,21]]},
+ {id:'omar',name:'Omar',city:'Casablanca',tz:1,speaks:'Arabic',learns:'Spanish',kept:16,sched:17,level:'A2',slots:[[1,17],[5,9]]},
+ {id:'beatriz',name:'Beatriz',city:'São Paulo',tz:-3,speaks:'Portuguese',learns:'English',kept:21,sched:22,level:'B1',slots:[[1,13],[3,13],[5,8]]},
+ {id:'jonas',name:'Jonas',city:'Berlin',tz:2,speaks:'German',learns:'English',kept:11,sched:12,level:'B2',slots:[[1,18],[3,18]]},
+ {id:'noah',name:'Noah',city:'Toronto',tz:-4,speaks:'English',learns:'Spanish',kept:15,sched:16,level:'A2',slots:[[1,12],[3,13],[5,9]]},
+ {id:'emma',name:'Emma',city:'London',tz:1,speaks:'English',learns:'Arabic',kept:20,sched:21,level:'A2',slots:[[1,17],[3,18],[0,19]]},
+ {id:'grace',name:'Grace',city:'Chicago',tz:-5,speaks:'English',learns:'French',kept:8,sched:9,level:'A2',slots:[[1,11],[3,12]]},
+];
+const TOPICS=['Describe the street you grew up on.','What did you eat today, and who cooked it?','A trip that went wrong. What happened?','Your job or studies, explained to a ten-year-old.','A film or series you would recommend, and why.','What does a normal Sunday look like for you?','Something people misunderstand about your city.','A skill you want to learn this year.','The best advice someone gave you.','Plans for this weekend, in as much detail as you can.'];
+
+const S={step:1,maxStep:1,speak:'English',learn:'Spanish',tz:3,
+  slots:new Set([k(1,19),k(1,20),k(3,19),k(3,20),k(5,10),k(5,11),k(0,21)]),
+  pick:null,slotPick:null,weeksLen:4,signed:false,excluded:new Set(),
+  weeks:[],cur:0,noShows:0,timer:null,elapsed:0,topic:0,ended:false};
+
+const toUTC=(how,tz)=>mod(how-tz,168);
+const fmt=how=>`${DAYS[Math.floor(mod(how,168)/24)]} ${String(mod(how,24)).padStart(2,'0')}:00`;
+const rel=p=>p.sched?p.kept/p.sched:1;
+const initials=n=>n.slice(0,2).toUpperCase();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function findMatches(){
+  const mine=new Set([...S.slots].map(h=>toUTC(h,S.tz)));
+  const sameLang=POOL.filter(p=>p.speaks===S.learn && p.learns===S.speak && !S.excluded.has(p.id));
+  const out={shown:[],noOverlap:0,lowBand:0};
+  for(const p of sameLang){
+    if(rel(p)<0.8){out.lowBand++;continue}
+    const overlap=p.slots.map(([d,h])=>toUTC(k(d,h),p.tz)).filter(u=>mine.has(u)).sort((a,b)=>a-b);
+    if(!overlap.length){out.noOverlap++;continue}
+    out.shown.push({p,overlap});
+  }
+  out.shown.sort((a,b)=>rel(b.p)-rel(a.p)||b.overlap.length-a.overlap.length);
+  return out;
+}
+
+const stage=document.getElementById('stage');
+function go(n){S.step=n;S.maxStep=Math.max(S.maxStep,n);render()}
+document.querySelectorAll('.step').forEach(b=>b.addEventListener('click',()=>go(+b.dataset.step)));
+
+function render(){
+  document.querySelectorAll('.step').forEach(b=>{
+    const n=+b.dataset.step;
+    b.disabled=n>S.maxStep;
+    if(n===S.step)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');
+  });
+  ({1:step1,2:step2,3:step3,4:step4})[S.step]();
+}
+
+function step1(){
+  const opts=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
+  let grid=`<div class="h"></div>`+DAYS.map(d=>`<div class="h">${d}</div>`).join('');
+  for(const h of HOURS){
+    grid+=`<div class="h">${String(h).padStart(2,'0')}:00</div>`;
+    for(let d=0;d<7;d++){const on=S.slots.has(k(d,h));
+      grid+=`<button class="cell ${on?'on':''}" data-how="${k(d,h)}" aria-pressed="${on}" aria-label="${DAYS[d]} ${h}:00"></button>`}
+  }
+  stage.innerHTML=`<div class="panel">
+    <div class="panel-head"><div><span class="eyebrow">Step 1</span><h3>Tell us when you can talk, every week</h3>
+      <p class="muted">Mark only hours you could keep for a month. Fewer, honest hours give better matches than many hopeful ones.</p></div></div>
+    <div class="fields">
+      <label class="field" for="f-speak">I speak<select id="f-speak">${opts(LANGS,S.speak)}</select></label>
+      <label class="field" for="f-learn">I'm learning<select id="f-learn">${opts(LANGS,S.learn)}</select></label>
+      <label class="field" for="f-tz">My time zone<select id="f-tz">${TZS.map(([o,n])=>`<option value="${o}" ${o===S.tz?'selected':''}>UTC${o>=0?'+':''}${o} · ${n}</option>`).join('')}</select></label>
+    </div>
+    <div class="gridwrap"><div class="grid">${grid}</div></div>
+    <div class="actions"><button class="btn" id="next1">Find partners</button><span class="legend mono">${S.slots.size} hours a week selected</span></div>
+  </div>`;
+  stage.querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>{
+    const h=+c.dataset.how; S.slots.has(h)?S.slots.delete(h):S.slots.add(h); resetPact(); step1();
+    stage.querySelector(`[data-how="${h}"]`)?.focus();
+  }));
+  const bind=(id,key,num)=>document.getElementById(id).addEventListener('change',e=>{S[key]=num?+e.target.value:e.target.value;resetPact();step1()});
+  bind('f-speak','speak');bind('f-learn','learn');bind('f-tz','tz',true);
+  document.getElementById('next1').disabled=S.speak===S.learn||!S.slots.size;
+  document.getElementById('next1').addEventListener('click',()=>go(2));
+}
+
+function resetPact(){S.pick=null;S.slotPick=null;S.signed=false;S.weeks=[];S.cur=0;S.noShows=0;S.ended=false;stopTimer();S.maxStep=Math.min(S.maxStep,2)}
+
+function step2(){
+  const m=findMatches();
+  const notes=[];
+  if(m.noOverlap)notes.push(`${m.noOverlap} ${S.learn} speaker${m.noOverlap>1?'s':''} hidden: no weekly hours overlap yours.`);
+  if(m.lowBand)notes.push(`${m.lowBand} hidden: reliability below your band (under 80% of sessions kept).`);
+  if(S.excluded.size)notes.push(`Previous partner excluded after two no-shows.`);
+  const cards=m.shown.map(({p,overlap})=>{
+    const r=Math.round(rel(p)*100);
+    return `<article class="card ${S.pick===p.id?'pick':''}">
+      <div class="who"><div class="av">${initials(p.name)}</div><div><b>${esc(p.name)}</b><small>${esc(p.city)} · speaks ${p.speaks} · learning ${p.learns} ${p.level}</small></div></div>
+      <div class="rel"><div class="row"><span>Sessions kept</span><span class="mono">${p.kept} of ${p.sched} · ${r}%</span></div><div class="meter"><i style="width:${r}%"></i></div></div>
+      <div class="chips">${overlap.map(u=>`<span class="chip">${fmt(u+S.tz)} <small>· ${fmt(u+p.tz).slice(4)} hers/his</small></span>`).join('')}</div>
+      <button class="btn ${S.pick===p.id?'':'ghost'}" data-pick="${p.id}">${S.pick===p.id?'Selected':'Propose a pact'}</button>
+    </article>`}).join('');
+  stage.innerHTML=`<div class="panel">
+    <div class="panel-head"><div><span class="eyebrow">Step 2</span><h3>${m.shown.length?`${m.shown.length} ${S.learn} speaker${m.shown.length>1?'s':''} free when you are`:'No one fits yet'}</h3>
+      <p class="muted">Ranked by reliability first, then by how many hours you share. Times are in your zone, with theirs alongside. You can hold one active partner at a time.</p></div></div>
+    ${cards?`<div class="cards">${cards}</div>`:`<div class="empty">Nobody who speaks ${S.learn} and is learning ${S.speak} shares your hours right now. Add a few more hours in step 1, or join the waitlist and we'll notify you when someone fits.</div>`}
+    ${notes.length?`<div class="notes">${notes.map(n=>`<div>${n}</div>`).join('')}</div>`:''}
+    <div class="actions"><button class="btn ghost" id="back2">Edit hours</button><button class="btn" id="next2" ${S.pick?'':'disabled'}>Continue to pact</button></div>
+  </div>`;
+  stage.querySelectorAll('[data-pick]').forEach(b=>b.addEventListener('click',()=>{
+    if(S.pick!==b.dataset.pick){resetPact();S.pick=b.dataset.pick}
+    const hit=m.shown.find(x=>x.p.id===S.pick); S.slotPick=hit.overlap[0]; step2();
+  }));
+  document.getElementById('back2').addEventListener('click',()=>go(1));
+  document.getElementById('next2').addEventListener('click',()=>go(3));
+}
+
+function partner(){return POOL.find(p=>p.id===S.pick)}
+
+function step3(){
+  const p=partner(); const hit=findMatches().shown.find(x=>x.p.id===p.id);
+  const overlap=hit?hit.overlap:[S.slotPick];
+  stage.innerHTML=`<div class="panel">
+    <div class="panel-head"><div><span class="eyebrow">Step 3</span><h3>Your pact with ${esc(p.name)}</h3>
+      <p class="muted">A short, fixed agreement. Short enough to say yes to, long enough to build the habit.</p></div></div>
+    <div class="pact">
+      <div>
+        <span class="eyebrow">Standing slot</span>
+        <div class="chips">${overlap.map(u=>`<button class="chip" data-slot="${u}" aria-pressed="${u===S.slotPick}" ${S.signed?'disabled':''}>${fmt(u+S.tz)} <small>· ${fmt(u+p.tz)}</small></button>`).join('')}</div>
+        <span class="eyebrow">Length</span>
+        <div class="chips">${[4,8].map(n=>`<button class="chip" data-len="${n}" aria-pressed="${n===S.weeksLen}" ${S.signed?'disabled':''}>${n} weeks</button>`).join('')}</div>
+        <span class="eyebrow">Format</span>
+        <p class="muted">30 minutes in the Kept room: 15 in ${S.learn} for you, then 15 in ${S.speak} for ${esc(p.name)}.</p>
+      </div>
+      <div>
+        <ul class="rules">
+          <li><b>−24 h</b><span>Both confirm the session. Cancelling before this is free.</span></li>
+          <li><b>late</b><span>A late cancel or no-show is logged on your reliability record.</span></li>
+          <li><b>cover</b><span>If your partner misses, a standby learner joins within 5 minutes.</span></li>
+          <li><b>2 miss</b><span>Two no-shows end the pact. The other person is rematched first.</span></li>
+          <li><b>end</b><span>After ${S.weeksLen} weeks, renew with one tap or part ways with no penalty.</span></li>
+        </ul>
+        <div class="sign">
+          <div class="sig ${S.signed?'done':''}"><span class="s">${S.signed?'You ✓':'You'}</span><span class="muted">${S.signed?'Signed':'Not signed'}</span></div>
+          <div class="sig ${S.signed==='both'?'done':''}" id="sig-p"><span class="s">${esc(p.name)}${S.signed==='both'?' ✓':''}</span><span class="muted">${S.signed==='both'?'Signed':S.signed?'Reviewing…':'Not signed'}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="actions"><button class="btn ghost" id="back3">Back to matches</button>
+      ${S.signed==='both'?`<button class="btn" id="next3">Go to sessions</button>`:`<button class="btn" id="signbtn" ${S.signed?'disabled':''}>Sign the pact</button>`}</div>
+  </div>`;
+  stage.querySelectorAll('[data-slot]').forEach(b=>b.addEventListener('click',()=>{S.slotPick=+b.dataset.slot;step3()}));
+  stage.querySelectorAll('[data-len]').forEach(b=>b.addEventListener('click',()=>{S.weeksLen=+b.dataset.len;step3()}));
+  document.getElementById('back3').addEventListener('click',()=>go(2));
+  document.getElementById('signbtn')?.addEventListener('click',()=>{
+    S.signed=true;step3();
+    setTimeout(()=>{if(S.signed===true&&S.step===3){S.signed='both';buildWeeks();step3()}else if(S.signed===true){S.signed='both';buildWeeks()}},1300);
+  });
+  document.getElementById('next3')?.addEventListener('click',()=>go(4));
+}
+
+function buildWeeks(){
+  const local=mod(S.slotPick+S.tz,168), d=Math.floor(local/24), h=local%24;
+  const now=new Date(); const first=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const jsDow=(d+1)%7; let add=mod(jsDow-first.getDay(),7); if(add===0)add=7;
+  first.setDate(first.getDate()+add);
+  S.weeks=Array.from({length:S.weeksLen},(_,i)=>{const dt=new Date(first);dt.setDate(first.getDate()+7*i);
+    return {date:dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+` · ${String(h).padStart(2,'0')}:00`,status:i===0?'confirmed':'scheduled',note:''}});
+  S.cur=0;S.noShows=0;S.ended=false;
+}
+
+function stopTimer(){if(S.timer){clearInterval(S.timer);S.timer=null}}
+
+function step4(){
+  const p=partner(); const total=S.weeks.length;
+  const keptN=S.weeks.filter(w=>w.status==='kept'||w.status==='covered').length;
+  const pk=p.kept+S.weeks.filter(w=>w.status==='kept').length, ps=p.sched+S.weeks.filter(w=>w.status==='kept'||w.status==='covered').length;
+  const pills={confirmed:['info','Both confirmed'],scheduled:['idle','Scheduled'],kept:['kept','Kept'],covered:['bad','Partner missed · covered'],cancelled:['idle','Pact ended']};
+  const done=S.cur>=total;
+  const backup=findMatches().shown.find(x=>x.p.id!==p.id)?.p;
+  const backupName=backup?backup.name:'a standby learner';
+  let right;
+  if(S.ended){
+    right=`<div class="callout bad"><b>Pact ended after two no-shows.</b><span>${esc(p.name)}'s record now shows ${pk} of ${ps}. You keep your ${keptN}-week streak, and you're first in line for a new match.</span>
+      <div class="actions"><button class="btn" id="rematch">Find a new partner</button></div></div>`;
+  }else if(done){
+    right=`<div class="callout good"><b>Pact complete: ${keptN} of ${total} weeks.</b><span>Renew with ${esc(p.name)} for another ${S.weeksLen} weeks on the same slot, or part ways with no penalty.</span>
+      <div class="actions"><button class="btn" id="renew">Renew pact</button></div></div>`;
+  }else{
+    const sec=Math.max(0,1800-S.elapsed), half=S.elapsed<900?0:1;
+    const pa=Math.min(100,S.elapsed/900*100), pb=Math.max(0,Math.min(100,(S.elapsed-900)/900*100));
+    right=`<div class="room">
+      <div class="row"><span class="eyebrow">Session room · week ${S.cur+1}</span><span class="pill ${S.timer?'good':'idle'}">${S.timer?'Live':'Not started'}</span></div>
+      <div class="clock" id="clock">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}</div>
+      <div class="halves">
+        <div class="half ${half===0?'now':''}"><div class="track"><i id="ta" style="width:${pa}%"></i></div>${S.learn} · ${esc(p.name)} helps you</div>
+        <div class="half b ${half===1?'now':''}"><div class="track"><i id="tb" style="width:${pb}%"></i></div>${S.speak} · you help ${esc(p.name)}</div>
+      </div>
+      <span class="eyebrow">Topic prompt</span>
+      <p class="prompt">${TOPICS[S.topic%TOPICS.length]}</p>
+      <div class="actions">
+        <button class="btn" id="run" ${S.timer?'disabled':''}>${S.elapsed?'Resume':'Start session'} <small style="font-weight:400">(demo ×60 speed)</small></button>
+        <button class="btn ghost" id="topic">Next topic</button>
+        <button class="btn warn" id="noshow" ${S.timer?'disabled':''}>Simulate partner no-show</button>
+      </div>
+    </div>`;
+  }
+  stage.innerHTML=`<div class="panel">
+    <div class="panel-head"><div><span class="eyebrow">Step 4</span><h3>You and ${esc(p.name)}, ${fmt(S.slotPick+S.tz)} weekly</h3>
+      <p class="muted">Run a session, or simulate a no-show to see standby cover and the automatic rematch.</p></div>
+      <div class="stats"><div class="stat"><b>${keptN}/${total}</b><span>weeks kept</span></div><div class="stat"><b>${S.noShows}</b><span>partner no-shows</span></div><div class="stat"><b>${Math.round(pk/ps*100)}%</b><span>${esc(p.name)}'s record</span></div></div></div>
+    <div class="sess">
+      <div>${right}</div>
+      <div><span class="eyebrow">This pact</span>
+        <ul class="weeks">${S.weeks.map((w,i)=>`<li><span><b>Week ${i+1}</b><small class="mono">${w.date}</small>${w.note?`<small>${w.note}</small>`:''}</span><span class="pill ${pills[w.status][0]}">${pills[w.status][1]}</span></li>`).join('')}</ul>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('rematch')?.addEventListener('click',()=>{S.excluded.add(p.id);resetPact();go(2)});
+  document.getElementById('renew')?.addEventListener('click',()=>{buildWeeks();step4()});
+  document.getElementById('topic')?.addEventListener('click',()=>{S.topic++;step4()});
+  document.getElementById('run')?.addEventListener('click',()=>{
+    S.timer=setInterval(()=>{
+      const before=S.elapsed; S.elapsed=Math.min(1800,S.elapsed+6);
+      if(S.step!==4)return;
+      if((before<900&&S.elapsed>=900)||S.elapsed>=1800){
+        if(S.elapsed>=1800){stopTimer();finishWeek('kept','')}
+        step4();return;
+      }
+      const sec=1800-S.elapsed, c=document.getElementById('clock');
+      if(c)c.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')}`;
+      const ta=document.getElementById('ta'),tb=document.getElementById('tb');
+      if(ta)ta.style.width=Math.min(100,S.elapsed/900*100)+'%';
+      if(tb)tb.style.width=Math.max(0,(S.elapsed-900)/900*100)+'%';
+    },100);
+    step4();
+  });
+  document.getElementById('noshow')?.addEventListener('click',()=>{
+    S.noShows++;
+    finishWeek('covered',`${esc(p.name)} missed. ${esc(backupName)} joined from standby.`);
+    if(S.noShows>=2){S.ended=true;S.weeks.forEach((w,i)=>{if(i>=S.cur)w.status='cancelled'})}
+    step4();
+  });
+}
+
+function finishWeek(status,note){
+  const w=S.weeks[S.cur]; w.status=status; w.note=note;
+  S.cur++; S.elapsed=0; S.topic++;
+  if(S.weeks[S.cur])S.weeks[S.cur].status='confirmed';
+}
+
+render();
+</script>
